@@ -7,26 +7,8 @@ import {
   useEffect,
   useState,
 } from "react";
+import { SignInCredentials, SignInResponse, User } from "../@types/api";
 import { api } from "../services/apiClient";
-
-interface CommonData {
-  permissions: string[];
-  roles: string[];
-}
-
-interface User extends CommonData {
-  email: string;
-}
-
-interface SignInResponse extends CommonData {
-  token: string;
-  refreshToken: string;
-}
-
-interface SignInCredentials {
-  email: string;
-  password: string;
-}
 
 interface AuthContextData {
   signIn(credentials: SignInCredentials): Promise<void>;
@@ -60,10 +42,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     if (token) {
       api
         .get<User>("/me")
-        .then(response => {
-          console.log(response.data);
-          setUser(response.data);
-        })
+        .then(response => setUser(response.data))
         .catch();
     }
   }, []);
