@@ -1,24 +1,11 @@
-import { GetServerSideProps, NextPage } from "next";
-import { parseCookies } from "nookies";
+import { NextPage } from "next";
 import { useState } from "react";
 import { useAuthContext } from "../contexts/AuthContext";
+import { withSSRGuest } from "../utils/withSSRGuest";
 
-export const getServerSideProps: GetServerSideProps = async context => {
-  const cookies = parseCookies(context);
-
-  if ("nextauth.token" in cookies) {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {},
-  };
-};
+export const getServerSideProps = withSSRGuest(async () => ({
+  props: {},
+}));
 
 const Home: NextPage = () => {
   const [isLoading, setIsLoading] = useState(false);
