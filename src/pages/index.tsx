@@ -3,9 +3,7 @@ import { useState } from "react";
 import { useAuthContext } from "../contexts/AuthContext";
 import { withSSRGuest } from "../utils/withSSRGuest";
 
-export const getServerSideProps = withSSRGuest(async () => ({
-  props: {},
-}));
+export const getServerSideProps = withSSRGuest();
 
 const Home: NextPage = () => {
   const [isLoading, setIsLoading] = useState(false);

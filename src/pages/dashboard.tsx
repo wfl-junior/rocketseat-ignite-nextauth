@@ -1,7 +1,19 @@
 import { NextPage } from "next";
 import { useEffect } from "react";
 import { useAuthContext } from "../contexts/AuthContext";
-import { api } from "../services/api";
+import { getAPIClient } from "../services/api";
+import { api } from "../services/apiClient";
+import { withSSRAuth } from "../utils/withSSRAuth";
+
+export const getServerSideProps = withSSRAuth(async context => {
+  const api = getAPIClient(context);
+  const response = await api.get("/me");
+  console.log(response.data);
+
+  return {
+    props: {},
+  };
+});
 
 const Dashboard: NextPage = () => {
   const { user } = useAuthContext();

@@ -2,7 +2,7 @@ import { GetServerSideProps, PreviewData } from "next";
 import { parseCookies } from "nookies";
 import { ParsedUrlQuery } from "querystring";
 
-export function withSSRGuest<
+export function withSSRAuth<
   TProps extends Record<string, any> = Record<string, any>,
   TQuery extends ParsedUrlQuery = ParsedUrlQuery,
   TData extends PreviewData = PreviewData,
@@ -12,10 +12,10 @@ export function withSSRGuest<
   return async context => {
     const cookies = parseCookies(context);
 
-    if ("nextauth.token" in cookies) {
+    if (!("nextauth.token" in cookies)) {
       return {
         redirect: {
-          destination: "/dashboard",
+          destination: "/",
           permanent: false,
         },
       };
