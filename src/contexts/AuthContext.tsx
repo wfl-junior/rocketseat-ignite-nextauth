@@ -1,9 +1,17 @@
 import Router from "next/router";
+import { setCookie } from "nookies";
 import { createContext, useCallback, useContext, useState } from "react";
 import { api } from "../services/api";
 
 interface User {
   email: string;
+  permissions: string[];
+  roles: string[];
+}
+
+interface SignInResponse {
+  token: string;
+  refreshToken: string;
   permissions: string[];
   roles: string[];
 }
@@ -34,8 +42,21 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const signIn: AuthContextData["signIn"] = useCallback(async credentials => {
     try {
-      const response = await api.post("/sessions", credentials);
-      const { permissions, roles } = response.data;
+      const response = await api.post<SignInResponse>("/sessions", credentials);
+      const { token, refreshToken, permissions, roles } = response.data;
+
+      const cookieOptions = {
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: "/",
+      };
+
+      setCookie(undefined, "nextauth.token", token, cookieOptions);
+      setCookie(
+        undefined,
+        "nextauth.refreshToken",
+        refreshToken,
+        cookieOptions,
+      );
 
       setUser({
         email: credentials.email,
