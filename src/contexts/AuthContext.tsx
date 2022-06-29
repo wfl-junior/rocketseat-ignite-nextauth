@@ -1,5 +1,5 @@
 import Router from "next/router";
-import { parseCookies, setCookie } from "nookies";
+import { destroyCookie, parseCookies, setCookie } from "nookies";
 import {
   createContext,
   useCallback,
@@ -38,6 +38,13 @@ const AuthContext = createContext({} as AuthContextData);
 
 export const useAuthContext = () => useContext(AuthContext);
 
+export function signOut() {
+  destroyCookie(undefined, "nextauth.token");
+  destroyCookie(undefined, "nextauth.refreshToken");
+
+  Router.push("/");
+}
+
 interface AuthContextProviderProps {
   children: React.ReactNode;
 }
@@ -54,7 +61,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       api
         .get<User>("/me")
         .then(response => setUser(response.data))
-        .catch(error => console.log({ error }));
+        .catch();
     }
   }, []);
 

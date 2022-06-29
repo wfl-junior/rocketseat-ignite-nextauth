@@ -1,5 +1,6 @@
 import axios, { AxiosError } from "axios";
 import { parseCookies, setCookie } from "nookies";
+import { signOut } from "../contexts/AuthContext";
 
 interface FailedRequest {
   onSuccess: (token: string) => void;
@@ -75,5 +76,9 @@ api.interceptors.response.use(undefined, (error: AxiosError) => {
         });
       });
     }
+
+    signOut();
   }
+
+  return Promise.reject(error);
 });
