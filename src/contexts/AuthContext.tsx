@@ -82,8 +82,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         roles,
       });
 
-      // @ts-ignore
-      api.defaults.headers["Authorization"] = `Bearer ${token}`;
+      (api.defaults.headers as any)["Authorization"] = `Bearer ${token}`;
       Router.push("/dashboard");
     } catch (error) {
       console.log({ error });
