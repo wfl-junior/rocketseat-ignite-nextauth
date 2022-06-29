@@ -60,7 +60,10 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     if (token) {
       api
         .get<User>("/me")
-        .then(response => setUser(response.data))
+        .then(response => {
+          console.log(response.data);
+          setUser(response.data);
+        })
         .catch();
     }
   }, []);

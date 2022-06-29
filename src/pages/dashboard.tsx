@@ -9,7 +9,7 @@ const Dashboard: NextPage = () => {
   useEffect(() => {
     api
       .get("/me")
-      .then(response => console.log(response))
+      .then(response => console.log(response.data))
       .catch();
   }, []);
 
