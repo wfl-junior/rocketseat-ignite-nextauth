@@ -1,5 +1,12 @@
-import { createContext, useCallback, useContext } from "react";
+import Router from "next/router";
+import { createContext, useCallback, useContext, useState } from "react";
 import { api } from "../services/api";
+
+interface User {
+  email: string;
+  permissions: string[];
+  roles: string[];
+}
 
 interface SignInCredentials {
   email: string;
@@ -9,6 +16,7 @@ interface SignInCredentials {
 interface AuthContextData {
   signIn(credentials: SignInCredentials): Promise<void>;
   isAuthenticated: boolean;
+  user: User | null;
 }
 
 const AuthContext = createContext({} as AuthContextData);
@@ -22,19 +30,27 @@ interface AuthContextProviderProps {
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   children,
 }) => {
-  const isAuthenticated = false;
+  const [user, setUser] = useState<User | null>(null);
 
   const signIn: AuthContextData["signIn"] = useCallback(async credentials => {
     try {
       const response = await api.post("/sessions", credentials);
-      console.log(response.data);
+      const { permissions, roles } = response.data;
+
+      setUser({
+        email: credentials.email,
+        permissions,
+        roles,
+      });
+
+      Router.push("/dashboard");
     } catch (error) {
       console.log({ error });
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ signIn, isAuthenticated }}>
+    <AuthContext.Provider value={{ signIn, isAuthenticated: !!user, user }}>
       {children}
     </AuthContext.Provider>
   );
