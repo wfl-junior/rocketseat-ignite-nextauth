@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext } from "react";
+import { api } from "../services/api";
 
 interface SignInCredentials {
   email: string;
@@ -23,10 +24,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 }) => {
   const isAuthenticated = false;
 
-  const signIn: AuthContextData["signIn"] = useCallback(
-    async credentials => console.log(credentials),
-    [],
-  );
+  const signIn: AuthContextData["signIn"] = useCallback(async credentials => {
+    try {
+      const response = await api.post("/sessions", credentials);
+      console.log(response.data);
+    } catch (error) {
+      console.log({ error });
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ signIn, isAuthenticated }}>

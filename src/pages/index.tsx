@@ -1,24 +1,27 @@
 import { NextPage } from "next";
 import { useState } from "react";
 import { useAuthContext } from "../contexts/AuthContext";
-import styles from "../styles/Home.module.css";
 
 const Home: NextPage = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { signIn } = useAuthContext();
 
   return (
     <form
-      className={styles.container}
       noValidate
       onSubmit={async e => {
         e.preventDefault();
+
+        setIsLoading(true);
 
         await signIn({
           email,
           password,
         });
+
+        setIsLoading(false);
       }}
     >
       <input
@@ -35,7 +38,9 @@ const Home: NextPage = () => {
         placeholder="Senha"
       />
 
-      <button type="submit">Entrar</button>
+      <button type="submit" disabled={isLoading}>
+        Entrar
+      </button>
     </form>
   );
 };
