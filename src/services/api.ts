@@ -3,6 +3,7 @@ import { GetServerSidePropsContext } from "next";
 import { parseCookies, setCookie } from "nookies";
 import { signOut } from "../contexts/AuthContext";
 import { isBrowser } from "../utils/isBrowser";
+import { AuthTokenError } from "./errors/AuthTokenError";
 
 interface FailedRequest {
   onSuccess: (token: string) => void;
@@ -99,6 +100,8 @@ export function getAPIClient(context?: GetServerSidePropsContext) {
       // faz logout caso tenha dado erro que não seja token expirado
       if (isBrowser()) {
         signOut();
+      } else {
+        return Promise.reject(new AuthTokenError());
       }
     }
 
