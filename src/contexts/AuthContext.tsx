@@ -1,19 +1,26 @@
 import Router from "next/router";
-import { setCookie } from "nookies";
-import { createContext, useCallback, useContext, useState } from "react";
+import { parseCookies, setCookie } from "nookies";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { api } from "../services/api";
 
-interface User {
-  email: string;
+interface CommonData {
   permissions: string[];
   roles: string[];
 }
 
-interface SignInResponse {
+interface User extends CommonData {
+  email: string;
+}
+
+interface SignInResponse extends CommonData {
   token: string;
   refreshToken: string;
-  permissions: string[];
-  roles: string[];
 }
 
 interface SignInCredentials {
@@ -40,6 +47,17 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
 
+  useEffect(() => {
+    const { "nextauth.token": token } = parseCookies();
+
+    if (token) {
+      api
+        .get<User>("/me")
+        .then(response => setUser(response.data))
+        .catch(error => console.log({ error }));
+    }
+  }, []);
+
   const signIn: AuthContextData["signIn"] = useCallback(async credentials => {
     try {
       const response = await api.post<SignInResponse>("/sessions", credentials);
@@ -64,6 +82,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         roles,
       });
 
+      // @ts-ignore
+      api.defaults.headers["Authorization"] = `Bearer ${token}`;
       Router.push("/dashboard");
     } catch (error) {
       console.log({ error });
