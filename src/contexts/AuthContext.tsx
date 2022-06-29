@@ -11,7 +11,8 @@ import { SignInCredentials, SignInResponse, User } from "../@types/api";
 import { api } from "../services/apiClient";
 
 interface AuthContextData {
-  signIn(credentials: SignInCredentials): Promise<void>;
+  signIn: (credentials: SignInCredentials) => Promise<void>;
+  signOut: () => void;
   isAuthenticated: boolean;
   user: User | null;
 }
@@ -20,11 +21,13 @@ const AuthContext = createContext({} as AuthContextData);
 
 export const useAuthContext = () => useContext(AuthContext);
 
+let authChannel: BroadcastChannel;
+
 export function signOut() {
   destroyCookie(undefined, "nextauth.token");
   destroyCookie(undefined, "nextauth.refreshToken");
 
-  Router.push("/");
+  authChannel.postMessage("signOut");
 }
 
 interface AuthContextProviderProps {
@@ -35,6 +38,24 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    authChannel = new BroadcastChannel("auth");
+
+    authChannel.onmessage = message => {
+      switch (message.data) {
+        case "signOut": {
+          Router.push("/");
+          break;
+        }
+        // funciona, porém não atualiza dados nas outras abas
+        // case "signIn": {
+        //   Router.push("/dashboard");
+        //   break;
+        // }
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const { "nextauth.token": token } = parseCookies();
@@ -73,13 +94,16 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
       (api.defaults.headers as any)["Authorization"] = `Bearer ${token}`;
       Router.push("/dashboard");
+      // authChannel.postMessage("signIn");
     } catch (error) {
       console.log({ error });
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ signIn, isAuthenticated: !!user, user }}>
+    <AuthContext.Provider
+      value={{ signIn, signOut, isAuthenticated: !!user, user }}
+    >
       {children}
     </AuthContext.Provider>
   );

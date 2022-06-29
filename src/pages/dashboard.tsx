@@ -15,7 +15,7 @@ export const getServerSideProps = withSSRAuth(async context => {
 });
 
 const Dashboard: NextPage = () => {
-  const { user } = useAuthContext();
+  const { user, signOut } = useAuthContext();
 
   // useEffect(() => {
   //   api
@@ -27,6 +27,8 @@ const Dashboard: NextPage = () => {
   return (
     <Fragment>
       <h1>Dashboard: {user?.email}</h1>
+
+      <button onClick={signOut}>Sign out</button>
 
       <Can permissions={["metrics.list"]}>
         <div>Métricas</div>
