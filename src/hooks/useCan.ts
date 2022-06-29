@@ -1,5 +1,6 @@
 import { Permission, Role } from "../@types/api";
 import { useAuthContext } from "../contexts/AuthContext";
+import { validateUserPermissionsAndRoles } from "../utils/validateUserPermissionsAndRoles";
 
 interface UseCanParams {
   permissions?: Permission[];
@@ -7,30 +8,11 @@ interface UseCanParams {
 }
 
 export function useCan({ permissions, roles }: UseCanParams): boolean {
-  const { user, isAuthenticated } = useAuthContext();
+  const { user } = useAuthContext();
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return false;
   }
 
-  if (permissions && permissions.length > 0) {
-    const hasAllPermissions = permissions.every(permission => {
-      return user.permissions.includes(permission);
-    });
-
-    if (!hasAllPermissions) {
-      return false;
-    }
-  }
-  if (roles && roles.length > 0) {
-    const hasAllRoles = roles.some(permission => {
-      return user.roles.includes(permission);
-    });
-
-    if (!hasAllRoles) {
-      return false;
-    }
-  }
-
-  return true;
+  return validateUserPermissionsAndRoles({ user, permissions, roles });
 }
